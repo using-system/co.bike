@@ -1,0 +1,35 @@
+name: az-infra-spoke-network
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/spoke-network/**"
+      - ".github/workflows/az-infra-spoke-network.yml"
+  pull_request:
+    paths:
+      - "infra/spoke-network/**"
+      - ".github/workflows/az-infra-spoke-network.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [{ name: "staging" }]
+    uses: ./.github/workflows/template-terraform.yml
+    with:
+      working-dir: "infra/az-spoke-network"
+      environment: ${{ matrix.env.name }}
+      backend-key: "spoke-network"
+    secrets: inherit
