@@ -1,0 +1,156 @@
+name: Template - Docker
+
+on:
+  workflow_call:
+    inputs:
+      working-dir:
+        required: true
+        type: string
+      environment:
+        required: false
+        type: string
+      backend-key:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_BACKEND_KEY: ${{ inputs.backend-key }}
+  ENVIRONMENT: ${{ inputs.environment }}
+  ARM_USE_OIDC: "true"
+
+jobs:
+
+  analyze:
+    runs-on: ubuntu-24.04
+    environment: plan-${{ inputs.environment }}
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID  }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      TF_VAR_azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 'latest'
+          terraform_wrapper: false
+
+      - name: Terraform Fmt
+        run: terraform fmt -recursive -check
+        working-directory: ${{ inputs.working-dir }}
+        
+      - name: Init
+        run: terraform init -backend-config key=$TF_BACKEND_KEY-$ENVIRONMENT.tfstate -backend-config subscription_id=$ARM_SUBSCRIPTION_ID -upgrade
+        working-directory: ${{ inputs.working-dir }}
+
+      - name: Validate
+        run: terraform validate
+        working-directory: ${{ inputs.working-dir }}
+
+      - name: Check terraform with Checkov
+        id: checkov
+        uses: using-system/devops/github/actions/checkov@main
+        with:
+          working-directory:  ${{ inputs.working-dir }}
+
+  plan:
+    runs-on: ubuntu-24.04
+    environment: plan-${{ inputs.environment }}
+    needs: analyze
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID  }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      TF_VAR_azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+      
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 'latest'
+          terraform_wrapper: true
+
+      - name: Init
+        run: terraform init -backend-config key=$TF_BACKEND_KEY-$ENVIRONMENT.tfstate -backend-config subscription_id=$ARM_SUBSCRIPTION_ID -upgrade
+        working-directory: ${{ inputs.working-dir }}
+
+      - name: Plan
+        id: plan
+        run: |
+          terraform plan -out=tfplan -var-file="vars/${ENVIRONMENT}.tfvars" -detailed-exitcode | tee plan_output.txt
+
+          PLAN_EXIT_CODE=${PIPESTATUS[0]}
+          if [ $PLAN_EXIT_CODE -ne 0 ]; then
+            echo "Terraform plan failed with exit code $PLAN_EXIT_CODE."
+            exit 1
+          fi
+          
+          if grep -q "Infrastructure is up-to-date." plan_output.txt; then
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+          elif grep -q "Your infrastructure matches the configuration." plan_output.txt; then
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+          elif grep -q "Plan:" plan_output.txt; then
+            echo "changes=true" >> "$GITHUB_OUTPUT"
+          else
+            exit 1
+          fi
+        working-directory: ${{ inputs.working-dir }}
+
+      - name: Upload tfplan as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ inputs.environment }}
+          path: |
+            ${{ inputs.working-dir }}/tfplan
+
+    outputs:
+      changes: ${{ steps.plan.outputs.changes }}
+
+  apply:
+    needs: [plan]
+    runs-on: ubuntu-24.04
+    if: needs.plan.outputs.changes == 'true'
+    environment: ${{ inputs.environment }}
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID  }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      TF_VAR_azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 'latest'
+          terraform_wrapper: true
+
+      - name: Init
+        run: terraform init -backend-config key=$TF_BACKEND_KEY-$ENVIRONMENT.tfstate -backend-config subscription_id=$ARM_SUBSCRIPTION_ID -upgrade
+        working-directory: ${{ inputs.working-dir }}
+
+      - name: Download tfplan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: "tfplan-${{ inputs.environment }}"
+          path: ${{ inputs.working-dir }}
+
+      - name: Terraform Apply
+        run: terraform apply 'tfplan'
+        working-directory: ${{ inputs.working-dir }}
