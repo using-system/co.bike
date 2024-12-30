@@ -40,3 +40,23 @@ resource "azurerm_private_dns_zone_virtual_network_link" "vaultcore" {
   tags = var.tags
 }
 
+resource "azurerm_private_dns_zone" "blob" {
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = azurerm_resource_group.vnet.name
+
+  tags = var.tags
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "blob" {
+
+  depends_on = [azurerm_private_dns_zone.blob]
+
+  name                = module.vnet.vnet_name
+  resource_group_name = azurerm_resource_group.vnet.name
+
+  private_dns_zone_name = "privatelink.blob.core.windows.net"
+  virtual_network_id    = module.vnet.vnet_id
+  registration_enabled  = false
+
+  tags = var.tags
+}

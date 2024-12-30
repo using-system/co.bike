@@ -1,4 +1,4 @@
-name: Template - Docker
+name: Template - Terraform
 
 on:
   workflow_call:

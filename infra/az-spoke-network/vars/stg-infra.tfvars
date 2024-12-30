@@ -16,7 +16,7 @@ vnet_address_space = "192.168.0.0/16"
 vnet_subnets = {
   "ClusterSubnet" = {
     name              = "ClusterSubnet"
-    service_endpoints = ["Microsoft.KeyVault", "Microsoft.ContainerRegistry"]
+    service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ContainerRegistry"]
     address_prefixes  = ["192.168.0.0/20"]
     network_rules = [
     ]
@@ -78,7 +78,7 @@ vnet_subnets = {
   },
   "ResourcesSubnet" = {
     name              = "ResourcesSubnet"
-    service_endpoints = ["Microsoft.KeyVault"]
+    service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault"]
     address_prefixes  = ["192.168.17.0/24"]
     network_rules = [
     ]
