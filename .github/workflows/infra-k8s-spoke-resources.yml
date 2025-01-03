@@ -1,0 +1,41 @@
+name: infra-k8s-spoke-resources
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/k8s-spoke-resources/**"
+      - ".github/workflows/infra-k8s-spoke-resources.yml"
+  pull_request:
+    paths:
+      - "infra/k8s-spoke-resources/**"
+      - ".github/workflows/infra-k8s-spoke-resources.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  terraform:
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [{ name: "stg-infra" }]
+    uses: ./.github/workflows/template-terraform.yml
+    with:
+      working-dir: "infra/k8s-spoke-resources"
+      environment: ${{ matrix.env.name }}
+      backend-key: "k8s-spoke-resources"
+      aks-cluster-name: "cob-aks"
+      aks-resource-group: "cob-${{ matrix.env.name }}-we-aks"      
+      vars: |
+        azure_subscription_id
+        azure_tenant_id
+      private-runner: true
+    secrets: inherit
