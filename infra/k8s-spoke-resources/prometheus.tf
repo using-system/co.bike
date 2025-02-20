@@ -39,6 +39,28 @@ resource "kubernetes_manifest" "prometheus_peer_authentication" {
   }
 }
 
+resource "kubernetes_manifest" "kube_state_metrics_peer_authentication" {
+  manifest = {
+    apiVersion = "security.istio.io/v1beta1"
+    kind       = "PeerAuthentication"
+    metadata = {
+      name      = "kube-state-metrics-peer-auth"
+      namespace = kubernetes_namespace.prometheus.metadata[0].name
+    }
+    spec = {
+      selector = {
+        matchLabels = {
+          "app.kubernetes.io/name" = "kube-state-metrics"
+        }
+      }
+      mtls = {
+        mode = "PERMISSIVE"
+      }
+    }
+  }
+}
+
+
 resource "azurerm_user_assigned_identity" "prometheus" {
   location            = var.location
   name                = "prometheus-identity"
