@@ -234,7 +234,7 @@ body {
 
 @media(min-width : 651px) {
     .wallScreenImg {
-        background-image: url("/wall.jpg");
+        background-image: url("/wall.png");
     }
 
     .mainTitle {
@@ -246,7 +246,7 @@ body {
 
 @media(max-width : 650px) {
     .wallScreenImg {
-        background-image: url("/velo.jpg");
+        background-image: url("/wall.png");
     }
 
     .mainTitle {

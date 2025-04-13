@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 tags = {
-  project       = "cob"
+  project       = "m8t"
   env           = "dev-app"
   provisionedby = "terraform"
 }

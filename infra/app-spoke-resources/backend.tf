@@ -4,8 +4,8 @@
 
 terraform {
   backend "azurerm" {
-    resource_group_name  = "cob-hub-we-storage"
-    storage_account_name = "cobhubwetfstate"
+    resource_group_name  = "m8t-hub-we-storage"
+    storage_account_name = "m8thubwetfstate"
     container_name       = "tfstates"
     key                  = "*******"
     subscription_id      = "********-****-****-****-************"

@@ -314,19 +314,19 @@ data "kubernetes_service" "istio_gateway" {
 resource "azurerm_dns_a_record" "this" {
   count = var.ingress_host != "" ? 1 : 0
 
-  name                = replace(var.ingress_host, ".co.bike", "")
-  zone_name           = "co.bike"
-  resource_group_name = "cob-hub-infra-we-dns"
+  name                = replace(var.ingress_host, ".m8te.ai", "")
+  zone_name           = "m8te.ai"
+  resource_group_name = "m8t-hub-infra-we-dns"
   ttl                 = 300
   records             = [data.kubernetes_service.istio_gateway.status[0].load_balancer[0].ingress[0].ip]
 }
 
 resource "azurerm_dns_a_record" "this_root" {
-  count = var.ingress_host == "www.co.bike" ? 1 : 0
+  count = var.ingress_host == "www.m8te.ai" ? 1 : 0
 
   name                = "@"
-  zone_name           = "co.bike"
-  resource_group_name = "cob-hub-infra-we-dns"
+  zone_name           = "m8te.ai"
+  resource_group_name = "m8t-hub-infra-we-dns"
   ttl                 = 300
   records             = [data.kubernetes_service.istio_gateway.status[0].load_balancer[0].ingress[0].ip]
 }

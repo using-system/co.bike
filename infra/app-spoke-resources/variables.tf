@@ -25,6 +25,17 @@ variable "env" {
   description = "Environment name"
 }
 
+variable "project_name" {
+  description = "Project name"
+  default     = "m8t"
+}
+
+variable "dns_zone_name" {
+  description = "The DNS zone name"
+  default     = "m8te.ai"
+
+}
+
 variable "tags" {
   description = "The default tags to associate with resources."
   type        = map(string)
