@@ -46,6 +46,6 @@ jobs:
     with:
       dockerfile: src/ui/blankapp/Dockerfile
       working-directory: src/ui/blankapp
-      image_name: cobhubinfraweacr.azurecr.io/blankapp
+      image_name: m8thubinfraweacr.azurecr.io/blankapp
       version: ${{ needs.version-tag.outputs.version }}
     secrets: inherit

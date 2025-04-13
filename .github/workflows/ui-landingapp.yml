@@ -46,7 +46,7 @@ jobs:
     with:
       dockerfile: src/ui/landingapp/Dockerfile
       working-directory: src/ui/landingapp
-      image_name: cobhubinfraweacr.azurecr.io/landingapp
+      image_name: m8thubinfraweacr.azurecr.io/landingapp
       version: ${{ needs.version-tag.outputs.version }}
     secrets: inherit
 
@@ -62,10 +62,10 @@ jobs:
     uses: ./.github/workflows/template-k8s-deploy.yml
     with:
       environment: ${{ matrix.env.name }}
-      namespace: "cob-${{ matrix.env.name }}"
+      namespace: "m8t-${{ matrix.env.name }}"
       app-name: "landingapp"
       image: ${{ needs.docker.outputs.image_name }}
-      aks-cluster-name: "cob-aks"
-      aks-resource-group: "cob-${{ matrix.env.infra }}-we-aks"    
+      aks-cluster-name: "m8t-aks"
+      aks-resource-group: "m8t-${{ matrix.env.infra }}-we-aks"    
       version-tag: "landingapp"
     secrets: inherit

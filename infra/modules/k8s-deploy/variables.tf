@@ -34,7 +34,7 @@ variable "env_vars" {
 variable "default_image" {
   description = "The default image to use if not specified in the container definition"
   type        = string
-  default     = "cobhubinfraweacr.azurecr.io/blankapp:0.1.0@sha256:979bd00d89e8ac42c9b949688e8fcba7d82e3f8710468bfc5053728c43d15bb3"
+  default     = "m8thubinfraweacr.azurecr.io/blankapp:0.1.0@sha256:319589057dfd597a11344d4649342b275fbc2935b1dc75a1d6be90f9b377ea15"
 }
 
 variable "volume_claims" {

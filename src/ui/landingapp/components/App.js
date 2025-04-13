@@ -7,12 +7,12 @@ export default function App({ children }) {
           <div className="doted">
 
             <div className="mainTitle appTitle">
-              co.bike
+              m8te.ai
             </div>
 
             <div className="text-center">
               <div className="col-xs-12 bottomScreen">
-                <div className="LinkBlank">co.bike &copy; {currentYear}</div>
+                <div className="LinkBlank">m8te.ai &copy; {currentYear}</div>
               </div>
             </div>
           </div>

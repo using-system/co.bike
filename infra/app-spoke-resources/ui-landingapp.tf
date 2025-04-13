@@ -1,6 +1,6 @@
 module "ui_landingapp" {
 
-  depends_on = [kubernetes_namespace.cob]
+  depends_on = [kubernetes_namespace.app]
 
   source = "../modules/k8s-deploy"
 
@@ -15,5 +15,5 @@ module "ui_landingapp" {
     memory = var.ui_landingapp_memory_request
   }
 
-  ingress_host = "${var.host_prefix}www.co.bike"
+  ingress_host = "${var.host_prefix}www.${var.dns_zone_name}"
 }

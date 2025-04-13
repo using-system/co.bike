@@ -9,8 +9,8 @@ export default function Home() {
   return (
     <Layout>
       <Head>
-        <title>Accueil | co.bike</title>
-        <meta name="description" content="Co.Bike - Roulez en sécurité et signalez les incivilités" />
+        <title>Home | m8te.ai</title>
+        <meta name="description" content="m8te.ai is a cutting-edge, secure chatbot solution that lets you query any type of data—whether it's databases, text files, or other sources—using natural language." />
       </Head>
       <div style={{ height: '70vh' }}>
         <App />
